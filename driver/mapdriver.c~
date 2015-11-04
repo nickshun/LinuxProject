@@ -1,7 +1,7 @@
 /****
- * mapdriver.c
+ * ascii.c
  *
- * The mapdriver character device driver implementation
+ * The ASCII character device driver implementation
  *
  * CREDITS:
  *   o Many parts of the driver code has to be credited to
@@ -11,7 +11,7 @@
  *              http://www.tldp.org/LDP/lkmpg/2.6/html/index.html)
  */
 
-#include "mapdriver.h"
+#include "ascii.h"
 
 /* Driver's Status is kept here */
 static driver_status_t status =
