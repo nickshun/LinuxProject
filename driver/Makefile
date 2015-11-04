@@ -19,9 +19,9 @@ CC_OPTIONS=-O1 $(WARNINGS) $(ISO) $(DEBUG) $(DEFINE)
 # Where to look for header files
 INC=-I. -I/usr/include -I/usr/src/kernels/`uname -r`/include
 
-DRIVER=ascii.o
-MODULE=ascii.ko
-EXE=ascii-test
+DRIVER=mapdriver.o
+MODULE=mapdriver.ko
+EXE=mapdriver-test
 OBJ=main.o $(DRIVER)
 
 obj-m += $(DRIVER)
@@ -56,8 +56,8 @@ $(EXE): main.o
 main.o: main.c common.h
 	$(CC) $(CC_OPTIONS) $(INC) -c main.c
 
-$(DRIVER): types.h ascii.h ascii.c
-	$(CC) $(CC_OPTIONS) $(INC) -c ascii.c
+$(DRIVER): types.h mapdriver.h mapdriver.c
+	$(CC) $(CC_OPTIONS) $(INC) -c mapdriver.c
 
 clean-all:
 	make clean
