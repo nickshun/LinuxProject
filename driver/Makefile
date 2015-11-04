@@ -61,7 +61,7 @@ $(DRIVER): types.h mapdriver.h mapdriver.c
 
 clean-all:
 	make clean
-	rmmod ascii
+	rmmod mapdriver
 	lsmod
 
 # EOF
