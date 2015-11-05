@@ -41,7 +41,7 @@
 /* The name for our device, as it will appear
  * in /proc/devices
  */
-#define DEVICE_NAME  "/dev/CSI230ASCII"
+#define DEVICE_NAME  "/dev/asciimap"
 
 /*
  * Driver status structure
@@ -116,7 +116,7 @@ void cleanup_module(void);
 
 /* Genereic Buffer Size */
 /* may be made up from the air */
-#define BSIZE             20
+#define BSIZE             100
 
 int width;
 int height;
