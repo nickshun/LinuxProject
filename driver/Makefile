@@ -27,6 +27,7 @@ OBJ=main.o $(DRIVER)
 obj-m += $(DRIVER)
 
 all: $(EXE)
+	touch /dev/asciimap
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 	@echo ""
 	@echo "ASCII Character Device Driver and the Test Program have been built."
@@ -45,7 +46,7 @@ compile: $(EXE) $(OBJ)
 register: $(DRIVER)
 	insmod ./$(MODULE)
 	modinfo $(MODULE)
-	lsmod | grep ascii
+	lsmod | grep mapdriver
 	@echo ""
 	@echo "ASCII Character Device Driver has been built and registered."
 	@echo ""

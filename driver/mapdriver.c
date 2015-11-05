@@ -16,13 +16,14 @@
 /* Driver's Status is kept here */
 static driver_status_t status =
 {
-	'0',   /* Starting ASCII char is '0' */
-	false, /* Not busy at the beginning */
-	{0},   /* buffer */
-	NULL,  /* buffer's ptr */
-	-1,    /* major */
-	-1     /* minor */
+        '0',   /* Starting ASCII char is '0' */
+        false, /* Not busy at the beginning */
+        {0},   /* buffer */
+        NULL,  /* buffer's ptr */
+        -1,    /* major */
+        -1     /* minor */
 };
+
 
 
 /* This function is called whenever a process
