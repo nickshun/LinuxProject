@@ -1,6 +1,6 @@
 /****
  * mapdriver.c
- *
+ 
  * The mapdriver character device driver implementation
  *
  * CREDITS:
@@ -13,6 +13,44 @@
 
 #include "mapdriver.h"
 
+void scan(int fd)
+{
+        int bytesRead;
+        do
+        {
+                bytesRead = read(fd, fileBuff, sizeof(fileBuff));
+                readBuff(bytesRead);
+        } while(bytesRead != 0);
+}
+
+char* read(char* mapBuf)
+{
+	char* map;
+
+        int i;
+        for (i = 0; i < sizeof(mapBuf); ++i)
+        {
+		if (foundFirstLine == 0)
+                {
+                        width++;
+                }
+
+		map[i] = buffer[i];
+
+		if (buffer[i] == '\n')
+		{
+			if (foundFirstLine == 0)
+			{
+				foundFirstLine = 1;
+			}
+			
+			height++;
+		}
+        }
+	
+	return map;
+}
+
 /* Driver's Status is kept here */
 static driver_status_t status =
 {
@@ -24,6 +62,16 @@ static driver_status_t status =
         -1     /* minor */
 };
 
+void scan(int fd)
+{
+        int bytesRead;
+        int isLastCharValid = 0;
+        do
+        {
+                bytesRead = read(fd, fileBuff, sizeof(fileBuff));
+                isLastCharValid = readBuff(isLastCharValid, bytesRead);
+        } while(bytesRead != 0);
+}
 
 
 /* This function is called whenever a process
