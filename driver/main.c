@@ -21,7 +21,7 @@ main(argc, argv)
     char buf[BSIZE];
     int fd, i, j, n;
 
-	if((fd = open("/dev/CSI230ASCII", O_RDWR)) >= 0)
+	if((fd = open("/dev/asciimap", O_RDWR)) >= 0)
 	{
 		for(i = 10; i <= 60; i += 5)
 		{

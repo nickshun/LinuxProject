@@ -13,20 +13,8 @@
 
 #include "mapdriver.h"
 
-void scan(int fd)
-{
-        int bytesRead;
-        do
-        {
-                bytesRead = read(fd, fileBuff, sizeof(fileBuff));
-                readBuff(bytesRead);
-        } while(bytesRead != 0);
-}
-
 char* read(char* mapBuf)
 {
-	char* map;
-
         int i;
         for (i = 0; i < sizeof(mapBuf); ++i)
         {
@@ -34,8 +22,6 @@ char* read(char* mapBuf)
                 {
                         width++;
                 }
-
-		map[i] = buffer[i];
 
 		if (buffer[i] == '\n')
 		{
@@ -47,6 +33,16 @@ char* read(char* mapBuf)
 			height++;
 		}
         }
+	
+	size = length * width;
+	
+	char* map[size];
+	int j;
+	for (j = 0; j < size; j += 1)
+	{
+		map[j] = mapBuf[i];
+	}
+	
 	
 	return map;
 }
