@@ -50,6 +50,8 @@ main(argc, argv)
 			}
 		}
 
+		
+
 		close(fd);
 	}
 	else

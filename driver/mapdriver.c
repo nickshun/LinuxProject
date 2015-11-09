@@ -12,7 +12,7 @@
  */
 #include "mapdriver.h"
 
-char* read(char* mapBuf)
+/*char* read(char* mapBuf)
 {
         int i;
         for (i = 0; i < sizeof(mapBuf); ++i)
@@ -44,7 +44,7 @@ char* read(char* mapBuf)
 	
 	
 	return map;
-}
+}*/
 
 /* Driver's Status is kept here */
 static driver_status_t status =
@@ -77,12 +77,6 @@ static int device_open(inode, file)
 	struct file*  file;
 {
 	static int counter = 0;
-
-	int i;
-	for (i = 0; i < sizeof(static_buffer); i += 1)
-	{
-		strcpy( buffer[i], static_buffer[i]);
-	}
 #ifdef _DEBUG
 	printk("device_open(%p,%p)\n", inode, file);
 #endif
@@ -187,19 +181,65 @@ static ssize_t device_read(file, buffer, length, offset)
 	int bytes_read = 0;
 	
 	/* Actually put the data into the buffer */
-	while(length > 0)
+	/*while (length > 0)
 	{
-		/* Because the buffer is in the user data segment,
+		if (status.mapBuffPtr != NULL && status.mapBuffPtr != )
+		{
+			put_user(status.mapBuffPtr, buffer++);
+			
+                	length--;
+                	bytes_read++;
+			status.mapBuffPtr++;
+		}
+		else
+		{
+			length = 0;
+		}
+	}	*/
+
+
+	/*THE STATUS.MAPBUFFER CURRENTLY HOLDS THE ENTIRE STATIC STRING*/
+
+	/*int foundFirstLine = 0;
+	width = 0;
+	height = 0;
+	int i;
+        for (i = 0; i < size; ++i)
+        {
+                if (foundFirstLine == 0)
+                {
+                        width++;
+                }
+
+                if (buffer[i] == '\n')
+                {
+                        if (foundFirstLine == 0)
+                        {
+                                foundFirstLine = 1;
+                        }
+                        
+                        height++;
+                }
+        }
+        
+        mapSize = height * width;
+	put_user(buffptr, buffer);
+	bytes_read = sizeof(buffptr)
+	printk("\n\nsize of buffer%d\n\n", mapSize);
+*/
+	/*while(length > 0)
+	{
+		/ Because the buffer is in the user data segment,
 		 * not the kernel data segment, assignment wouldn't
 		 * work. Instead, we have to use put_user which
 		 * copies data from the kernel data segment to the
 		 * user data segment.
-		 */
+		 /
 		put_user(status.curr_char, buffer++);
 
 		length--;
 		bytes_read++;
-	}
+	}*/
 
 #ifdef _DEBUG
 	printk
@@ -212,11 +252,11 @@ static ssize_t device_read(file, buffer, length, offset)
 
 	/* 
 	 * once code reaches 127 we have to wrap around to '0'
-	 */
+	 /
 	if(++status.curr_char == 127)
 		status.curr_char = '0';
 
-	/* Read functions are supposed to return the number
+	/ Read functions are supposed to return the number
 	 * of bytes actually inserted into the buffer
 	 */
 	return bytes_read;
@@ -243,9 +283,7 @@ static ssize_t device_write(file, buffer, length, offset)
 	);
 #endif
 
-	/* Rewind ASCII char back to '0' */
-	status.curr_char = '0';
-
+	
 	return nbytes;
 }
 
@@ -254,6 +292,8 @@ static ssize_t device_write(file, buffer, length, offset)
 int
 init_module(void)
 {
+	int i;
+	
 	/* Register the character device (atleast try) */
 	status.major = register_chrdev
 	(
@@ -291,6 +331,13 @@ init_module(void)
 		status.major
 	);
 
+	status.mapBuffPtr = status.mapBuffer;
+
+        for (i = 0; i < sizeof(static_buffer); i++)
+        {
+                strncpy( status.mapBuffer, static_buffer, sizeof(static_buffer));
+        }
+	
 	return SUCCESS;
 }
 

@@ -1,1 +1,1 @@
-cmd_/home/eric/project/SleepFest2K15/driver/mapdriver.ko := cp /home/eric/project/SleepFest2K15/driver/mapdriver.ko.unsigned /home/eric/project/SleepFest2K15/driver/mapdriver.ko
+cmd_/home/eric/project/LinuxProject/driver/mapdriver.ko := cp /home/eric/project/LinuxProject/driver/mapdriver.ko.unsigned /home/eric/project/LinuxProject/driver/mapdriver.ko

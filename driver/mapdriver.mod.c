@@ -22,10 +22,8 @@ __attribute__((section("__versions"))) = {
 	{ 0xfa0d49c7, "__register_chrdev" },
 	{ 0x3c2c5af5, "sprintf" },
 	{ 0xea147363, "printk" },
-	{ 0xa1c76e0a, "_cond_resched" },
+	{ 0x7ec9bfbc, "strncpy" },
 	{ 0xb4390f9a, "mcount" },
-	{ 0xc3aaf0a9, "__put_user_1" },
-	{ 0xe914e41e, "strcpy" },
 };
 
 static const char __module_depends[]
@@ -34,7 +32,7 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "E7931C49091C917C20ABBA0");
+MODULE_INFO(srcversion, "1D25ECA2FE0B8FE68077F38");
 
 static const struct rheldata _rheldata __used
 __attribute__((section(".rheldata"))) = {
