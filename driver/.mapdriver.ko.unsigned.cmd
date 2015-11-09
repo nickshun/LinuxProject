@@ -1,0 +1,1 @@
+cmd_/home/eric/project/SleepFest2K15/driver/mapdriver.ko.unsigned := ld -r -m elf_x86_64 -T /usr/src/kernels/2.6.32-573.7.1.el6.x86_64/scripts/module-common.lds --build-id -o /home/eric/project/SleepFest2K15/driver/mapdriver.ko.unsigned /home/eric/project/SleepFest2K15/driver/mapdriver.o /home/eric/project/SleepFest2K15/driver/mapdriver.mod.o 

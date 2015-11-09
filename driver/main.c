@@ -54,7 +54,7 @@ main(argc, argv)
 	}
 	else
 	{
-		perror("open(/dev/CSI230ASCII) failed");
+		perror("open(/dev/asciimap) failed");
 		exit(1);
 	}
 

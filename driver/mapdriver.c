@@ -34,7 +34,7 @@ char* read(char* mapBuf)
 		}
         }
 	
-	size = length * width;
+	mapSize = height * width;
 	
 	char* map[size];
 	int j;
@@ -58,16 +58,16 @@ static driver_status_t status =
         -1     /* minor */
 };
 
-void scan(int fd)
+/*void scan(int fd)
 {
         int bytesRead;
         int isLastCharValid = 0;
         do
         {
-                bytesRead = read(fd, fileBuff, sizeof(fileBuff));
+                bytesRead = read(fd, buffer, size);
                 isLastCharValid = readBuff(isLastCharValid, bytesRead);
         } while(bytesRead != 0);
-}
+}*/
 
 
 /* This function is called whenever a process
@@ -79,6 +79,11 @@ static int device_open(inode, file)
 {
 	static int counter = 0;
 
+	int i;
+	for (i = 0; i < sizeof(static_buffer); i += 1)
+	{
+		strcpy( buffer[i], static_buffer[i]);
+	}
 #ifdef _DEBUG
 	printk("device_open(%p,%p)\n", inode, file);
 #endif
