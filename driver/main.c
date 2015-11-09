@@ -32,7 +32,7 @@ main(argc, argv)
 				(void) fprintf(stderr, "*** wanted %d bytes, got %d\n", i, n);
 
 				if(n < 0)
-					perror("read(CSI230ASCII) failed");
+					perror("read(asciimap) failed");
 			}
 			else
 			{

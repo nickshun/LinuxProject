@@ -10,7 +10,6 @@
  *     Source:  The Linux Kernel Module Programming Guide (specifically,
  *              http://www.tldp.org/LDP/lkmpg/2.6/html/index.html)
  */
-
 #include "mapdriver.h"
 
 char* read(char* mapBuf)
@@ -186,7 +185,7 @@ static ssize_t device_read(file, buffer, length, offset)
 {
 	/* Number of bytes actually written to the buffer */
 	int bytes_read = 0;
-
+	
 	/* Actually put the data into the buffer */
 	while(length > 0)
 	{
