@@ -76,7 +76,7 @@ typedef struct _driver_status
 	char mapBuffer[size];
 	
 	/*map buffer pointer*/
-	char* mapBuffPtr;
+	char buffPos;
 	
 } driver_status_t;
 

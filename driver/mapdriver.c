@@ -175,71 +175,27 @@ static ssize_t device_read(file, buffer, length, offset)
 	struct file* file;
     char*        buffer;  /* The buffer to fill with data */
     size_t       length;  /* The length of the buffer */
-    loff_t*      offset;  /* Our offset in the file */
+    loff_t*     offset;  /* Our offset in the file */
 {
 	/* Number of bytes actually written to the buffer */
 	int bytes_read = 0;
-	
+
 	/* Actually put the data into the buffer */
-	/*while (length > 0)
+	while (length > 0)
 	{
-		if (status.mapBuffPtr != NULL && status.mapBuffPtr != )
+		if (status.buffPos < mapSize && status.mapBuffer[status.buffPos] != NULL)
 		{
-			put_user(status.mapBuffPtr, buffer++);
+			put_user(status.mapBuffer[status.buffPos], buffer++);
 			
                 	length--;
                 	bytes_read++;
-			status.mapBuffPtr++;
+			status.buffPos++;
 		}
 		else
 		{
 			length = 0;
 		}
-	}	*/
-
-
-	/*THE STATUS.MAPBUFFER CURRENTLY HOLDS THE ENTIRE STATIC STRING*/
-
-	/*int foundFirstLine = 0;
-	width = 0;
-	height = 0;
-	int i;
-        for (i = 0; i < size; ++i)
-        {
-                if (foundFirstLine == 0)
-                {
-                        width++;
-                }
-
-                if (buffer[i] == '\n')
-                {
-                        if (foundFirstLine == 0)
-                        {
-                                foundFirstLine = 1;
-                        }
-                        
-                        height++;
-                }
-        }
-        
-        mapSize = height * width;
-	put_user(buffptr, buffer);
-	bytes_read = sizeof(buffptr)
-	printk("\n\nsize of buffer%d\n\n", mapSize);
-*/
-	/*while(length > 0)
-	{
-		/ Because the buffer is in the user data segment,
-		 * not the kernel data segment, assignment wouldn't
-		 * work. Instead, we have to use put_user which
-		 * copies data from the kernel data segment to the
-		 * user data segment.
-		 /
-		put_user(status.curr_char, buffer++);
-
-		length--;
-		bytes_read++;
-	}*/
+	} 
 
 #ifdef _DEBUG
 	printk
@@ -250,15 +206,9 @@ static ssize_t device_read(file, buffer, length, offset)
 	);
 #endif
 
-	/* 
-	 * once code reaches 127 we have to wrap around to '0'
-	 /
-	if(++status.curr_char == 127)
-		status.curr_char = '0';
-
-	/ Read functions are supposed to return the number
+	/* Read functions are supposed to return the number
 	 * of bytes actually inserted into the buffer
-	 */
+	*/
 	return bytes_read;
 }
 
@@ -292,8 +242,7 @@ static ssize_t device_write(file, buffer, length, offset)
 int
 init_module(void)
 {
-	int i;
-	
+	int i;	
 	/* Register the character device (atleast try) */
 	status.major = register_chrdev
 	(
@@ -331,12 +280,10 @@ init_module(void)
 		status.major
 	);
 
-	status.mapBuffPtr = status.mapBuffer;
+        strncpy( status.mapBuffer, static_buffer, sizeof(static_buffer) - 1);
 
-        for (i = 0; i < sizeof(static_buffer); i++)
-        {
-                strncpy( status.mapBuffer, static_buffer, sizeof(static_buffer));
-        }
+	status.buffPos = 0;
+	mapSize = sizeof(static_buffer) - 1;
 	
 	return SUCCESS;
 }

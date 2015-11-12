@@ -23,35 +23,20 @@ main(argc, argv)
 
 	if((fd = open("/dev/asciimap", O_RDWR)) >= 0)
 	{
-		for(i = 10; i <= 60; i += 5)
+		n = read(fd, buf, 10);
+		
+		while (n > 0)
 		{
-			n = read(fd, buf, i);
-
-			if(i != n)
+			for (i = 0; i < n; i++)
 			{
-				(void) fprintf(stderr, "*** wanted %d bytes, got %d\n", i, n);
-
-				if(n < 0)
-					perror("read(asciimap) failed");
+				printf("%c", buf[i]);
 			}
-			else
-			{
-				(void) printf("received:  ");
-				for (j = 0; j < n; j++) (void) printf("%c ", buf[j]);
-				(void) printf("\n");
-			}
-
-			if(i == 30)
-			{
-				n = write(fd, "BLAH", 4);
-
-				if(n < 0)
-					perror("write(/dev/ASCII) failed");
-			}
+					
+			n = read(fd, buf, 10);
 		}
 
+		printf ("\n\n");
 		
-
 		close(fd);
 	}
 	else
