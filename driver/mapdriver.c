@@ -176,40 +176,24 @@ static ssize_t device_read(file, buffer, length, offset)
     char*        buffer;  /* The buffer to fill with data */
     size_t       length;  /* The length of the buffer */
     loff_t*     offset;  /* Our offset in the file */
-{
-	/* Number of bytes actually written to the buffer */
-	int bytes_read = 0;
-
-	/* Actually put the data into the buffer */
-	while (length > 0)
+{	
+	if (*offset >= mapSize)
 	{
-		if (status.buffPos < mapSize && status.mapBuffer[status.buffPos] != NULL)
-		{
-			put_user(status.mapBuffer[status.buffPos], buffer++);
-			
-                	length--;
-                	bytes_read++;
-			status.buffPos++;
-		}
-		else
-		{
-			length = 0;
-		}
-	} 
+		return 0;	
+	}
+	
+	if (*offset + length > mapSize)
+	{
+		length = mapSize - *offset;
+	}
 
-#ifdef _DEBUG
-	printk
-	(
-		"ascii::device_read() - Read %d bytes, %d left\n",
-		bytes_read,
-		length
-	);
-#endif
+	if (copy_to_user(buffer, status.mapBuffer + *offset, length) != 0)
+	{
+		return -EFAULT;
+	}
 
-	/* Read functions are supposed to return the number
-	 * of bytes actually inserted into the buffer
-	*/
-	return bytes_read;
+	*offset += length;
+	return length;
 }
 
 
@@ -222,19 +206,73 @@ static ssize_t device_write(file, buffer, length, offset)
 	size_t       length;  /* The length of the buffer */
 	loff_t*      offset;  /* Our offset in the file */
 {
-	int nbytes = 0;
-
-#ifdef _DEBUG
-	printk
-	(
-		"ascii::device_write() - Length: [%d], Buf: [%s]\n",
-		length,
-		buffer
-	);
-#endif
-
+	int currentRow = *offset / width;
+	int endRow = 0;
+	int tempLength = 0;
+	int lengthToWrite = length;
+	int lengthThisLine = tempLength;
 	
-	return nbytes;
+	if (*offset >= mapSize)
+        {
+                return 0;       
+        }
+        
+        if (*offset + length > mapSize)
+        {
+                length = mapSize - *offset;
+        }
+	
+	endRow = (*offset + length) / width;
+	
+	if (currentRow != endRow)
+	{
+		while (lengthToWrite > 0)
+		{
+			tempLength = width * (currentRow + 1) - *offset - 1;
+			
+			if (tempLength > lengthToWrite)
+			{
+				lengthThisLine = lengthToWrite;
+			}
+			else
+			{
+				lengthThisLine = tempLength;
+			}
+			
+			
+			if (copy_from_user(status.mapBuffer + *offset, buffer + (length - lengthToWrite), lengthThisLine) != 0)
+                	{
+                       		return -EFAULT;
+                	}
+			
+			*offset += tempLength;
+			
+			lengthToWrite -= lengthThisLine;
+
+			printk("\n\nltoW: %d\n\n", lengthToWrite);
+			printk("\n\nltl: %d\n\n", lengthThisLine);
+			printk("\n\ntl: %d\n\n", tempLength);
+
+			if (lengthToWrite > 0)
+			{
+				put_user(status.mapBuffer + *offset, "\n");
+				*offset += 1;
+			}
+		
+			currentRow = *offset / width;
+		}
+	}
+	else
+	{
+        	if (copy_from_user(status.mapBuffer + *offset, buffer, length) != 0)
+        	{
+                	return -EFAULT;
+        	}
+		*offset += length;
+	}
+
+        return length;
+
 }
 
 
@@ -281,7 +319,10 @@ init_module(void)
 	);
 
         strncpy( status.mapBuffer, static_buffer, sizeof(static_buffer) - 1);
-
+	
+	width = 50;
+	height = 50;
+	
 	status.buffPos = 0;
 	mapSize = sizeof(static_buffer) - 1;
 	
