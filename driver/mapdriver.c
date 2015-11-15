@@ -12,40 +12,6 @@
  */
 #include "mapdriver.h"
 
-/*char* read(char* mapBuf)
-{
-        int i;
-        for (i = 0; i < sizeof(mapBuf); ++i)
-        {
-		if (foundFirstLine == 0)
-                {
-                        width++;
-                }
-
-		if (buffer[i] == '\n')
-		{
-			if (foundFirstLine == 0)
-			{
-				foundFirstLine = 1;
-			}
-			
-			height++;
-		}
-        }
-	
-	mapSize = height * width;
-	
-	char* map[size];
-	int j;
-	for (j = 0; j < size; j += 1)
-	{
-		map[j] = mapBuf[i];
-	}
-	
-	
-	return map;
-}*/
-
 /* Driver's Status is kept here */
 static driver_status_t status =
 {
@@ -56,18 +22,6 @@ static driver_status_t status =
         -1,    /* major */
         -1     /* minor */
 };
-
-/*void scan(int fd)
-{
-        int bytesRead;
-        int isLastCharValid = 0;
-        do
-        {
-                bytesRead = read(fd, buffer, size);
-                isLastCharValid = readBuff(isLastCharValid, bytesRead);
-        } while(bytesRead != 0);
-}*/
-
 
 /* This function is called whenever a process
  * attempts to open the device file
@@ -166,6 +120,37 @@ static int device_release(inode, file)
 	return SUCCESS;
 }
 
+void findDimensions()
+{
+	char currentChar = ' ';
+	int currentIndex = 0;
+
+	width = 0;
+	height = 0;
+	mapSize = 0;
+	
+	while (currentChar != '\n' && currentIndex < size)
+	{
+		mapSize++;
+		width++;
+		currentChar = status.mapBuffer[currentIndex];
+		currentIndex++;
+	}
+
+	while (currentChar != '\0' && currentIndex < size)
+	{
+		mapSize++;
+		currentChar = status.mapBuffer[currentIndex];
+		currentIndex++;
+	}
+	
+	height = mapSize / width;
+	
+	if (mapSize % width != 0)
+	{
+		height++;
+	}
+}
 
 /* This function is called whenever a process which
  * have already opened the device file attempts to
@@ -179,6 +164,7 @@ static ssize_t device_read(file, buffer, length, offset)
 {	
 	if (*offset >= mapSize)
 	{
+		*offset -= 1;
 		return 0;	
 	}
 	
@@ -206,22 +192,25 @@ static ssize_t device_write(file, buffer, length, offset)
 	size_t       length;  /* The length of the buffer */
 	loff_t*      offset;  /* Our offset in the file */
 {
+	length--;
 	int currentRow = *offset / width;
 	int endRow = 0;
 	int tempLength = 0;
-	int lengthToWrite = length;
+	int lengthToWrite = 0;
 	int lengthThisLine = tempLength;
 	
-	if (*offset >= mapSize)
+	if (*offset >= size)
         {
                 return 0;       
         }
         
-        if (*offset + length > mapSize)
+        if (*offset + length > size)
         {
-                length = mapSize - *offset;
+                length = size - *offset;
         }
 	
+	lengthToWrite = length;	
+
 	endRow = (*offset + length) / width;
 	
 	if (currentRow != endRow)
@@ -245,21 +234,27 @@ static ssize_t device_write(file, buffer, length, offset)
                        		return -EFAULT;
                 	}
 			
-			*offset += tempLength;
+			*offset += lengthThisLine;
 			
 			lengthToWrite -= lengthThisLine;
 
-			printk("\n\nltoW: %d\n\n", lengthToWrite);
-			printk("\n\nltl: %d\n\n", lengthThisLine);
-			printk("\n\ntl: %d\n\n", tempLength);
-
 			if (lengthToWrite > 0)
 			{
-				put_user(status.mapBuffer + *offset, "\n");
+				status.mapBuffer[*offset] = '\n';
 				*offset += 1;
 			}
 		
 			currentRow = *offset / width;
+		}
+		
+		if (*offset > mapSize - 1)
+		{
+			mapSize = *offset + 1;
+		}
+		
+		if (endRow > height - 1)
+		{
+			height = endRow + 1;
 		}
 	}
 	else
@@ -270,7 +265,7 @@ static ssize_t device_write(file, buffer, length, offset)
         	}
 		*offset += length;
 	}
-
+	
         return length;
 
 }
@@ -320,11 +315,7 @@ init_module(void)
 
         strncpy( status.mapBuffer, static_buffer, sizeof(static_buffer) - 1);
 	
-	width = 50;
-	height = 50;
-	
-	status.buffPos = 0;
-	mapSize = sizeof(static_buffer) - 1;
+	findDimensions();
 	
 	return SUCCESS;
 }
