@@ -474,6 +474,7 @@ deps_/home/eric/project/LinuxProject/driver/mapdriver.o := \
     $(wildcard include/config/x86/wp/works/ok.h) \
     $(wildcard include/config/x86/intel/usercopy.h) \
   /usr/src/kernels/2.6.32-573.7.1.el6.x86_64/arch/x86/include/asm/uaccess_64.h \
+  /home/eric/project/LinuxProject/driver/common.h \
 
 /home/eric/project/LinuxProject/driver/mapdriver.o: $(deps_/home/eric/project/LinuxProject/driver/mapdriver.o)
 

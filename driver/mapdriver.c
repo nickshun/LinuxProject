@@ -270,6 +270,29 @@ static ssize_t device_write(file, buffer, length, offset)
 
 }
 
+int device_ioctl(struct inode* inode, 
+		struct file* file, 
+		unsigned int ioctl_num, 
+		unsigned long ioctl_param)
+{
+	
+	switch(ioctl_num)
+	{
+	case IOCTL_RESET:
+		printk("Ressetting\n");
+		break;
+	case IOCTL_ZERO:
+		printk("Zeroing\n");
+		break;
+	case IOCTL_VALIDATE:
+		printk("Validating\n");
+		break;
+	}
+	
+	return SUCCESS;
+}
+
+
 
 /* Initialize the module - Register the character device */
 int
@@ -279,7 +302,7 @@ init_module(void)
 	/* Register the character device (atleast try) */
 	status.major = register_chrdev
 	(
-		0,
+		MAJOR_NUM,
 		DEVICE_NAME,
 		&Fops
 	);

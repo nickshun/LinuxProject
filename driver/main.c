@@ -7,6 +7,7 @@
 
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/ioctl.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -18,8 +19,8 @@ main(argc, argv)
 	int   argc;
 	char* argv[];
 {
-    char buf[BSIZE];
-    int fd, i, j, n;
+    char buf[1024];
+    int fd, i, j, n, c;
 	
 	if((fd = open("/dev/asciimap", O_RDWR)) >= 0)
 	{
@@ -81,6 +82,13 @@ main(argc, argv)
 
                         n = read(fd, buf, 10);
                 }
+		
+		c = ioctl(fd, IOCTL_RESET, 0);
+
+		if (c < 0)
+		{
+			printf("\nfailed\n");
+		}
 		
 		close(fd);
 		

@@ -26,8 +26,10 @@
 #include <linux/fs.h>       /* The character device
                              * definitions are here
                              * */
-#include <asm/uaccess.h>  /* for put/get_user */
+#include <linux/ioctl.h>
 
+#include <asm/uaccess.h>  /* for put/get_user */
+#include "common.h"
 /* Return codes */
 #define SUCCESS      0
 
@@ -40,14 +42,11 @@
 #define BSIZE             100
 #define size              BSIZE * BSIZE
 
-/* The name for our device, as it will appear
+/* The name for or device, as it will appear
  * in /proc/devices
  */
 #define DEVICE_NAME  "/dev/asciimap"
-
-/*
- * Driver status structure
- */
+ 
 typedef struct _driver_status
 {	
 	/* Is the device open right now? Used to prevent
@@ -88,6 +87,8 @@ static int device_open(struct inode*, struct file*);
 static int  device_release(struct inode*, struct file*);
 static ssize_t device_read(struct file*, char*, size_t, loff_t*);
 static ssize_t device_write(struct file*, const char*, size_t, loff_t*);
+ int device_ioctl(struct inode*, struct file*, unsigned int, unsigned long);
+
 
 /* Kernel module-related */
 
@@ -108,7 +109,7 @@ struct file_operations Fops =
 	device_write,
 	NULL,   /* readdir */
 	NULL,   /* poll/select */
-	NULL,   /* ioctl */
+	device_ioctl,   /* ioctl */
 	NULL,   /* mmap */
 	device_open,
 	NULL,   /* flush */
