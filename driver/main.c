@@ -46,9 +46,8 @@ main(argc, argv)
 		n = write(fd, writting, sizeof(writting));
 			
 		close(fd);
-		
-		fd = open("/dev/asciimap", O_RDWR);
-
+		if((fd = open("/dev/asciimap", O_RDWR)) >= 0)
+	        {
 		n = read(fd, buf, 10);
 
                 while (n > 0)
@@ -68,9 +67,10 @@ main(argc, argv)
                 printf ("\n\n");
 		
 		close(fd);
-		
-		fd = open("/dev/asciimap", O_RDWR);
+		}
 
+		if((fd = open("/dev/asciimap", O_RDWR)) >= 0)
+	        {
                 n = read(fd, buf, 10);
 
                 while (n > 0)
@@ -91,7 +91,7 @@ main(argc, argv)
 		}
 		
 		close(fd);
-		
+		}
 		printf("\n\n");
 	}
 	else

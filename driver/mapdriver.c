@@ -306,7 +306,7 @@ init_module(void)
 		DEVICE_NAME,
 		&Fops
 	);
-
+	printk("device major num: %d\n\n", status.major);
 	/* Negative values signify an error */
 	if(status.major < 0)
 	{
