@@ -270,6 +270,36 @@ static ssize_t device_write(file, buffer, length, offset)
 
 }
 
+static loff_t device_lseek(struct file* file, loff_t offset, int orig)
+{
+	loff_t newPos = 0;
+	
+	switch(orig)
+	{
+	case 0:
+		newPos = offset;
+		break;
+	case 1:
+		newPos = file->f_pos + offset;
+		break;
+	case 2:
+		newPos = mapSize - offset;
+		break;
+	}
+	
+	if (newPos > mapSize)
+	{
+		newPos = mapSize;
+	}
+	if (newPos < 0)
+	{
+		newPos = 0;
+	}
+	
+	file->f_pos = newPos;
+	return newPos;
+}
+
 int device_ioctl(struct inode* inode, 
 		struct file* file, 
 		unsigned int ioctl_num, 

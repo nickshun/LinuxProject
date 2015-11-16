@@ -26,8 +26,7 @@ main(argc, argv)
 	{
 		n = read(fd, buf, 10);
 		
-		j = 0;
-		while (j < 12)
+		while (n > 0)
 		{
 			for (i = 0; i < n; i++)
 			{
@@ -35,7 +34,13 @@ main(argc, argv)
 			}
 					
 			n = read(fd, buf, 10);
-			j++;
+		}
+		
+		//c = lseek(fd, (off_t)100, SEEK_SET);
+
+		if (c < 0)
+		{
+			printf("\n\nfailed seeking\n\n");
 		}
 
 		printf ("\n\n");
@@ -82,8 +87,8 @@ main(argc, argv)
 
                         n = read(fd, buf, 10);
                 }
-		
-		/*c = ioctl(fd, IOCTL_RESET, 0);
+			
+		/*c = ioctl(fd, IOCTL_RESET);
 
 		if (c < 0)
 		{
