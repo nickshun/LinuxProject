@@ -16,8 +16,8 @@
 
 #define MAJOR_NUM       248
 
-#define IOCTL_RESET _IOR(MAJOR_NUM, 0, int) 
-#define IOCTL_ZERO _IOR(MAJOR_NUM, 1, int) 
-#define IOCTL_VALIDATE _IOR(MAJOR_NUM, 2, int) 
+#define IOCTL_RESET _IOWR(MAJOR_NUM, 0, int) 
+#define IOCTL_ZERO _IOWR(MAJOR_NUM, 1, int) 
+#define IOCTL_VALIDATE _IOWR(MAJOR_NUM, 2, int) 
 
 #endif

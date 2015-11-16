@@ -83,12 +83,12 @@ main(argc, argv)
                         n = read(fd, buf, 10);
                 }
 		
-		c = ioctl(fd, IOCTL_RESET, 0);
+		/*c = ioctl(fd, IOCTL_RESET, 0);
 
 		if (c < 0)
 		{
 			printf("\nfailed\n");
-		}
+		}*/
 		
 		close(fd);
 		}

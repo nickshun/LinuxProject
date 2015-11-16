@@ -300,12 +300,19 @@ init_module(void)
 {
 	int i;	
 	/* Register the character device (atleast try) */
-	status.major = register_chrdev
+	if ( register_chrdev
 	(
 		MAJOR_NUM,
 		DEVICE_NAME,
 		&Fops
-	);
+	) == 0)
+	{
+		status.major = MAJOR_NUM;
+	}
+	else
+	{
+		status.major = -1;
+	}
 	printk("device major num: %d\n\n", status.major);
 	/* Negative values signify an error */
 	if(status.major < 0)

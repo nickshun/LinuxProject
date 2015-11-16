@@ -1,2 +1,2 @@
-/home/csi230/LinuxProject/driver/mapdriver.ko
-/home/csi230/LinuxProject/driver/mapdriver.o
+/home/eric/project/LinuxProject/driver/mapdriver.ko
+/home/eric/project/LinuxProject/driver/mapdriver.o
