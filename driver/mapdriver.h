@@ -101,32 +101,20 @@ static loff_t device_lseek(struct file*, loff_t, int);
  * kept in the devices table, it can't be local to
  * init_module. NULL is for unimplemented functions.
  */
-//struct file_operations Fops =
-//{
-//	NULL,   /* owner */
-//	device_lseek,   /* seek */
-//	device_read,
-//	device_write,
-//	NULL,   /* readdir */
-//	NULL,   /* poll/select */
-//	device_ioctl,   /* ioctl */
-//	NULL,   /* mmap */
-//	device_open,
-//	NULL,   /* flush */
-//	device_release  /* a.k.a. close */
-//};
-//
 struct file_operations Fops =
 {
-        //.llseek = device_lseek,
-        .read = device_read,
-        .write = device_write,
-        .ioctl = device_ioctl,
-        .open = device_open,
-        .release = device_release
+	NULL,   /* owner */
+	device_lseek,   /* seek */
+	device_read,
+	device_write,
+	NULL,   /* readdir */
+	NULL,   /* poll/select */
+	device_ioctl,   /* ioctl */
+	NULL,   /* mmap */
+	device_open,
+	NULL,   /* flush */
+	device_release  /* a.k.a. close */
 };
-
-
 
 int init_module(void);
 void cleanup_module(void);

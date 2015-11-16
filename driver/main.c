@@ -36,7 +36,7 @@ main(argc, argv)
 			n = read(fd, buf, 10);
 		}
 		
-		//c = lseek(fd, (off_t)100, SEEK_SET);
+		c = lseek(fd, (off_t)100, SEEK_SET);
 
 		if (c < 0)
 		{
