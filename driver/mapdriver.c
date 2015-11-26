@@ -192,7 +192,6 @@ static ssize_t device_write(file, buffer, length, offset)
 	size_t       length;  /* The length of the buffer */
 	loff_t*      offset;  /* Our offset in the file */
 {
-	length--;
 	int currentRow = *offset / width;
 	int endRow = 0;
 	int tempLength = 0;
@@ -372,6 +371,8 @@ init_module(void)
 		DEVICE_NAME,
 		status.major
 	);
+	
+	memset(status.mapBuffer, 0, sizeof(status.mapBuffer));
 
         strncpy( status.mapBuffer, static_buffer, sizeof(static_buffer) - 1);
 	

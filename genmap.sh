@@ -26,7 +26,7 @@ let half=width/2
 		for((j=1; j<= height; j++))
 		do
 			#Get random num for ASCII
-			let randNum=$((RANDOM%90+32))
+			let randNum=$((RANDOM%2+32))
 			if [ $randNum -eq 32 ]
 			then
 				let "blanks++"

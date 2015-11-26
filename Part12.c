@@ -75,7 +75,7 @@ void scan(int fid)
 
 			}
 			/*if " ", \n \r or \t*/
-			if ((fileBuf[counter]== ' ') || (fileBuf[counter]== '\r') || (fileBuf[counter]== '\t') )
+			if ((fileBuf[counter]== '\r') || (fileBuf[counter]== '\t') )
 			{
 				wordsNo++;
 			}

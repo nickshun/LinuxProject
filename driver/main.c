@@ -48,7 +48,7 @@ main(argc, argv)
 		char writting[]  = "ThisIsA_test_This_should_be_in_there_this_should_also_probably_maybe_span_mulptiple_lines_definitely_now_becuasse_of_all_The_Extra_crap";
 		
 
-		n = write(fd, writting, sizeof(writting));
+		n = write(fd, writting, sizeof(writting) - 1);
 			
 		close(fd);
 		if((fd = open("/dev/asciimap", O_RDWR)) >= 0)
@@ -87,13 +87,13 @@ main(argc, argv)
 
                         n = read(fd, buf, 10);
                 }
-			
-		/*c = ioctl(fd, IOCTL_RESET);
+				
+		c = ioctl(fd, IOCTL_RESET);
 
 		if (c < 0)
 		{
 			printf("\nfailed\n");
-		}*/
+		}
 		
 		close(fd);
 		}
