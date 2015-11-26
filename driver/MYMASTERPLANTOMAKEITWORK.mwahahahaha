@@ -1,0 +1,11 @@
+make each call to write will write to the current offset, BUT it will assume anything that is written to it is all going on one row. It writes one character at a time and if it encounters a '\n' then it will assume that that should be the end and if its short of the width then it will pad the rest with '0' or ' '. Have an if statement to check if the current row is the first, if so update the width accordingly. if its not the first row and it reaches the end of the row and there is still more to write, slap a '\n' in there and tell the rest to take a hike without wrapping it to the next row. Now the device driver will always know the width and the height and size of whats there and we dont have to keep track of that stuff in two places because the client c program wont care about the dimensions, its just gonna try to write a row whenever it calls write.
+
+read can probably still function as is
+
+
+
+
+think about having a 2-D array for the map instead of a 1-D array for the map to make writting to a row even easier. the size of the first dimension array would be the maximum height allowed (100 as of now in our case). and the length of the second dimension arrays wouldbe the max width possible (also 100). then read could just convert the *offset pointer to a 2-D index based on the actual width and height of the map and once it reaches a '\n' it could be re-adjusted to the 1-D conversion of the beginning of the next row. 
+
+
+THIS IS THE BEST WAY I COULD THINK OF AND I'M GONNA TRY IT.............tomorrow. I have AI to start and its goddamn Thanksgiving and there's no one here and I'm all alone here right now....

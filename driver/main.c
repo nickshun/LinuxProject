@@ -14,6 +14,43 @@
 
 #include "common.h"
 
+/*int width = 50;
+int height = 50;
+int currentIndex = 0;
+
+int writeToDevice(int fd, char* str, int length)
+{
+	int bytes_wrote = 0;
+	
+	while (length > 0)
+	{
+		if (currentIndex % width == 0)
+		{
+			if (write(fd, '\n', 1) > 0)
+			{
+				bytes_wrote++;
+				currentIndex++;
+			}
+		}
+		else
+		{
+			if (write(fd, str[bytes_wrote], 1) > 0)
+			{
+				bytes_wrote++;
+				currentIndex++;
+				length--;
+			}
+		}
+	}
+	
+	if (currentIndex )
+	
+	return bytes_wrote;
+}*/
+
+
+
+
 int
 main(argc, argv)
 	int   argc;

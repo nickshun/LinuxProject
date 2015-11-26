@@ -192,22 +192,31 @@ static ssize_t device_write(file, buffer, length, offset)
 	size_t       length;  /* The length of the buffer */
 	loff_t*      offset;  /* Our offset in the file */
 {
-	int currentRow = *offset / width;
-	int endRow = 0;
-	int tempLength = 0;
-	int lengthToWrite = 0;
-	int lengthThisLine = tempLength;
-	
 	if (*offset >= size)
         {
                 return 0;       
         }
         
-        if (*offset + length > size)
+        if (*offset + length >= size)
         {
                 length = size - *offset;
         }
 	
+	/*copy_from_user(status.mapBuffer + *offset, buffer, length)
+
+	return length;
+
+
+	*/
+
+
+	
+	int currentRow = *offset / width;
+        int endRow = 0;
+        int tempLength = 0;
+        int lengthToWrite = 0;
+        int lengthThisLine = tempLength;
+
 	lengthToWrite = length;	
 
 	endRow = (*offset + length) / width;
