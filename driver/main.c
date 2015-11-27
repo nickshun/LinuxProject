@@ -14,42 +14,94 @@
 
 #include "common.h"
 
-/*int width = 50;
+int width = 50;
 int height = 50;
-int currentIndex = 0;
+int currentPos = 0;
+
+void printMap(int fd);
+int writeToDevice(int fd, char* str, int length);
+int readFromDevice(int fd, char* str, int length);
+int seekTo(int fd, int offset, int orig);
+
+
+int readFromDevice(int fd, char* str, int length)
+{
+	int bytes_read = read(fd, str, length);
+	
+	if (bytes_read >= 0)
+	{	
+		currentPos += bytes_read;
+	}
+	
+	return bytes_read;
+}
 
 int writeToDevice(int fd, char* str, int length)
 {
-	int bytes_wrote = 0;
+	int bytes_wrote = write(fd, str, length);
 	
-	while (length > 0)
+	if (bytes_wrote >= 0)
+        {       
+                currentPos += bytes_wrote;
+        }
+        
+        return bytes_wrote;
+}
+
+void printMap(int fd)
+{
+	int mapSize = width * height;
+	char* map[mapSize];
+	int validChar;
+	int lengthWritten = 0;	
+	char* ch[1];
+	int i;
+	int  n;
+	char buf[1024];
+
+	memset(map, '0', sizeof(map));
+
+	seekTo(fd, (off_t)0, SEEK_SET);
+	
+	while (lengthWritten < mapSize)
 	{
-		if (currentIndex % width == 0)
+		if (lengthWritten % width == 0)
 		{
-			if (write(fd, '\n', 1) > 0)
-			{
-				bytes_wrote++;
-				currentIndex++;
-			}
+			map[lengthWritten] = '\n';
 		}
 		else
 		{
-			if (write(fd, str[bytes_wrote], 1) > 0)
+			validChar = read(fd, ch, 1);
+			
+			if (validChar == 0)
+			{	
+				map[lengthWritten] = ' ';
+			}
+			else if (validChar > 0)
 			{
-				bytes_wrote++;
-				currentIndex++;
-				length--;
+				map[lengthWritten] = ch[0];
+				currentPos++;
 			}
 		}
+		lengthWritten++;
 	}
 	
-	if (currentIndex )
+	printf("\n");
 	
-	return bytes_wrote;
-}*/
+	for (i = 0; i < mapSize; i++)
+	{
+		printf("%c", map[i]);
+	}
+	
+	printf("\n");
+	
+}
 
-
-
+int seekTo(int fd, int offset, int orig)
+{
+	currentPos = lseek(fd, (off_t)offset, orig);
+	return currentPos;
+}
 
 int
 main(argc, argv)
@@ -59,7 +111,33 @@ main(argc, argv)
     char buf[1024];
     int fd, i, j, n, c;
 	
-	if((fd = open("/dev/asciimap", O_RDWR)) >= 0)
+	if ((fd = open("/dev/asciimap", O_RDWR)) >= 0)
+	{
+		writeToDevice(fd, static_map, sizeof(static_map) - 1);
+		printMap(fd);
+		
+		seekTo(fd, 100, SEEK_SET);
+
+		char writting[]  = "ThisIsAi_test_This_should_be_in_there_this_should_also_probably_maybe_span_mulptiple_lines_definitely_now_becuasse_of_all_The_Extra_stuff";
+
+
+		writeToDevice(fd, writting, sizeof(writting) - 1);
+		
+		printMap(fd);
+
+
+
+		close(fd);
+	}
+	else
+	{
+                perror("open(/dev/asciimap) failed");
+                exit(1);
+        }
+
+
+
+	/*if((fd = open("/dev/asciimap", O_RDWR)) >= 0)
 	{
 		n = read(fd, buf, 10);
 		
@@ -140,7 +218,7 @@ main(argc, argv)
 	{
 		perror("open(/dev/asciimap) failed");
 		exit(1);
-	}
+	}*/
 
     exit(0);
 }

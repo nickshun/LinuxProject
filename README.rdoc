@@ -1,6 +1,6 @@
 The genmap shell generates a random map from ASCII characters and can take in the length and the width. It also checks to make sure that no more than 50% is white space
 
-This driver will read and write a map that is defaulted to a 50 x 50 static map of initials. It can re-adjust the pointer to a desired location. It can also write things into the map and adjust the height as necessary.
+This driver will read and write a map that is defaulted to a 50 x 50 static map of initials. It can re-adjust the pointer to a desired location. It can also write things into the map and adjust the height as necessary.The main.c has functions to read, write, and print the map that all update the currentPos of the device pointer. The printMap() function will read from the device and pritn a '\n' in the correc tspot to make the map match the dimensions necessary
 
 The forking.c program will fork itself and execve() genmap.sh
 
