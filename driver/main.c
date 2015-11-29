@@ -17,12 +17,14 @@
 int width = 50;
 int height = 50;
 int currentPos = 0;
+int currentRow = 0;
 
 void printMap(int fd);
 int writeToDevice(int fd, char* str, int length);
 int readFromDevice(int fd, char* str, int length);
 int seekTo(int fd, int offset, int orig);
-
+int writeLineToDevice(int fd, char* str, int length);
+void updateCurrentRow();
 
 int readFromDevice(int fd, char* str, int length)
 {
@@ -33,19 +35,118 @@ int readFromDevice(int fd, char* str, int length)
 		currentPos += bytes_read;
 	}
 	
+	updateCurrentRow();
+	
 	return bytes_read;
+}
+
+void updateCurrentRow()
+{
+	int rowStart = 0;
+	currentRow = 0;	
+
+	while (currentPos > rowStart)
+	{
+		currentRow++;
+		rowStart += width;
+	}
+}
+
+int writeLineToDevice(int fd, char* str, int length)
+{
+        int i;
+        int n = 1;
+        int bytes_wrote = 0;
+        char ch[] = " ";
+
+	updateCurrentRow();
+
+	if (length > width)
+	{
+		length = width;
+	}
+
+        while (bytes_wrote < length && n > 0)
+        {
+                ch[0] = str[bytes_wrote];
+
+                if (ch[0] == '\n')
+                {
+                        ch[0] = ' ';
+                        while (n > 0 && currentPos % (width - 1) != 0)
+                        {
+                                n = write(fd, ch, 1);
+                                currentPos++;
+                        }
+                        bytes_wrote++;
+                }
+                else if (ch[0] == '\t')
+                {
+                        i = 0;
+                        ch[0] = ' ';
+                        while (n > 0 && currentPos % (width - 1) != 0 && i < 8)
+                        {
+                                n = write(fd, ch, 1);
+                                currentPos++;
+                                i++;
+                        }
+                        bytes_wrote++;
+                }
+                else
+                {
+                        n = write(fd, ch, 1);
+                        currentPos++;
+                        bytes_wrote++;
+                }
+        }
+
+        return bytes_wrote;
 }
 
 int writeToDevice(int fd, char* str, int length)
 {
-	int bytes_wrote = write(fd, str, length);
+	int i;
+	int n = 1;
+	int bytes_wrote = 0;
+	char ch[] = " ";
+
+	updateCurrentRow();
 	
-	if (bytes_wrote >= 0)
-        {       
-                currentPos += bytes_wrote;
-        }
-        
-        return bytes_wrote;
+	while (bytes_wrote < length && n > 0)
+	{
+		ch[0] = str[bytes_wrote];
+			
+		if (ch[0] == '\n')
+		{
+			ch[0] = ' ';
+			while (n > 0 && currentPos % (width - 1) != 0)
+			{
+				n = write(fd, ch, 1);
+				currentPos++;
+			}
+			bytes_wrote++;
+		}
+		else if (ch[0] == '\t')
+		{
+			i = 0;
+			ch[0] = ' ';
+			while (n > 0 && currentPos % (width - 1) != 0 && i < 8)
+                        {
+                                n = write(fd, ch, 1);
+                                currentPos++;
+				i++;
+                        }
+                        bytes_wrote++;
+		}
+		else
+		{
+			n = write(fd, ch, 1);
+			currentPos++;
+			bytes_wrote++;
+		}
+	}
+
+	return bytes_wrote;
 }
 
 void printMap(int fd)
@@ -62,6 +163,8 @@ void printMap(int fd)
 	memset(map, '0', sizeof(map));
 
 	seekTo(fd, (off_t)0, SEEK_SET);
+	
+	updateCurrentRow();
 	
 	while (lengthWritten < mapSize)
 	{
@@ -100,6 +203,7 @@ void printMap(int fd)
 int seekTo(int fd, int offset, int orig)
 {
 	currentPos = lseek(fd, (off_t)offset, orig);
+	
 	return currentPos;
 }
 
@@ -117,15 +221,25 @@ main(argc, argv)
 		printMap(fd);
 		
 		seekTo(fd, 100, SEEK_SET);
+		
+		//printf("\n\n%d\n\n", readFromDevice(fd, buf, 100));
 
-		char writting[]  = "ThisIsAi_test_This_should_be_in_there_this_should_also_probably_maybe_span_mulptiple_lines_definitely_now_becuasse_of_all_The_Extra_stuff";
+		char writting[]  = "ThisIsAi_test\t_This_should\n_be_in_there_this_should_also_probably_maybe_span_mulptiple_lines_definitely_now_becuasse_of_all_The_Extra_stuff";
 
 
 		writeToDevice(fd, writting, sizeof(writting) - 1);
 		
+
+		char line1[] = "this_line_better_be_over_fifty_characters_long_because_I'm_not_counting";
+		char line2[] = "this_one_is_less";
+		
+		
+		seekTo(fd, 7 * width, SEEK_SET);
+			
+		writeLineToDevice(fd, line1, sizeof(line1) - 1);
+		writeLineToDevice(fd, line2, sizeof(line2) - 1);
+			
 		printMap(fd);
-
-
 
 		close(fd);
 	}
