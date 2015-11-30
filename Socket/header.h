@@ -4,7 +4,7 @@
 #include <string.h>
 
 long defaultPort = 23032;
-string defaultIP = "127.0.0.1";
+char defaultIP[] = "127.0.0.1";
 
 void error(const char *msg)
 {

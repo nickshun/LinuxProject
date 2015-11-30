@@ -294,6 +294,8 @@ init_module(void)
 	
 	memset(status.mapBuffer, 0, sizeof(status.mapBuffer));
 	
+	strncpy(status.mapBuffer, static_buffer, sizeof(static_buffer) - 1);
+
 	return SUCCESS;
 }
 

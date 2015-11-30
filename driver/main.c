@@ -24,32 +24,39 @@ int writeToDevice(int fd, char* str, int length);
 int readFromDevice(int fd, char* str, int length);
 int seekTo(int fd, int offset, int orig);
 int writeLineToDevice(int fd, char* str, int length);
-void updateCurrentRow();
+int getMapPos(int pos);
+
+int getMapPos(int currPos)
+{
+	int pos = currPos;
+	int mapPos = 0;
+	
+	while (pos > width - 1)
+	{
+		mapPos += width;
+		pos -= (width - 1);
+	}
+	
+	mapPos += pos;
+	
+	return mapPos;
+}
 
 int readFromDevice(int fd, char* str, int length)
 {
+	int mapPos = getMapPos(currentPos);
+	int endPos = getMapPos(mapPos + length);
+
+	length -= ((int)(endPos / width) - (int)(mapPos / width));
+
 	int bytes_read = read(fd, str, length);
 	
 	if (bytes_read >= 0)
 	{	
 		currentPos += bytes_read;
 	}
-	
-	updateCurrentRow();
-	
+		
 	return bytes_read;
-}
-
-void updateCurrentRow()
-{
-	int rowStart = 0;
-	currentRow = 0;	
-
-	while (currentPos > rowStart)
-	{
-		currentRow++;
-		rowStart += width;
-	}
 }
 
 int writeLineToDevice(int fd, char* str, int length)
@@ -59,11 +66,9 @@ int writeLineToDevice(int fd, char* str, int length)
         int bytes_wrote = 0;
         char ch[] = " ";
 
-	updateCurrentRow();
-
 	if (length > width)
 	{
-		length = width;
+		length = width - 1 ;
 	}
 
         while (bytes_wrote < length && n > 0)
@@ -73,7 +78,7 @@ int writeLineToDevice(int fd, char* str, int length)
                 if (ch[0] == '\n')
                 {
                         ch[0] = ' ';
-                        while (n > 0 && currentPos % (width - 1) != 0)
+                        while (n > 0 && (currentPos) % (width - 1) != 0)
                         {
                                 n = write(fd, ch, 1);
                                 currentPos++;
@@ -84,7 +89,7 @@ int writeLineToDevice(int fd, char* str, int length)
                 {
                         i = 0;
                         ch[0] = ' ';
-                        while (n > 0 && currentPos % (width - 1) != 0 && i < 8)
+                        while (n > 0 && (currentPos) % (width - 1) != 0 && i < 8)
                         {
                                 n = write(fd, ch, 1);
                                 currentPos++;
@@ -109,8 +114,6 @@ int writeToDevice(int fd, char* str, int length)
 	int n = 1;
 	int bytes_wrote = 0;
 	char ch[] = " ";
-
-	updateCurrentRow();
 	
 	while (bytes_wrote < length && n > 0)
 	{
@@ -119,7 +122,7 @@ int writeToDevice(int fd, char* str, int length)
 		if (ch[0] == '\n')
 		{
 			ch[0] = ' ';
-			while (n > 0 && currentPos % (width - 1) != 0)
+			while (n > 0 && (currentPos) % (width - 1) != 0)
 			{
 				n = write(fd, ch, 1);
 				currentPos++;
@@ -130,7 +133,7 @@ int writeToDevice(int fd, char* str, int length)
 		{
 			i = 0;
 			ch[0] = ' ';
-			while (n > 0 && currentPos % (width - 1) != 0 && i < 8)
+			while (n > 0 && (currentPos) % (width - 1) != 0 && i < 8)
                         {
                                 n = write(fd, ch, 1);
                                 currentPos++;
@@ -163,8 +166,6 @@ void printMap(int fd)
 	memset(map, '0', sizeof(map));
 
 	seekTo(fd, (off_t)0, SEEK_SET);
-	
-	updateCurrentRow();
 	
 	while (lengthWritten < mapSize)
 	{
@@ -202,6 +203,27 @@ void printMap(int fd)
 
 int seekTo(int fd, int offset, int orig)
 {
+	int mapPos = 0;
+        int endPos = 0;
+	
+	switch(orig)
+	{
+	case 0:
+		endPos = getMapPos(mapPos + offset);
+		offset -= ((int)(endPos / width) - (int)(mapPos / width));
+		break;
+	case 1:
+		mapPos = getMapPos(currentPos);
+		endPos = getMapPos(mapPos + offset);
+		offset -= ((int)(endPos / width) - (int)(mapPos / width));
+		break;
+	case 2:
+		mapPos = width * height - 1;
+		endPos = getMapPos(mapPos - offset);
+		offset -= ((int)(endPos / width) - (int)(mapPos / width));
+		break;
+	}
+
 	currentPos = lseek(fd, (off_t)offset, orig);
 	
 	return currentPos;
@@ -217,12 +239,11 @@ main(argc, argv)
 	
 	if ((fd = open("/dev/asciimap", O_RDWR)) >= 0)
 	{
-		writeToDevice(fd, static_map, sizeof(static_map) - 1);
 		printMap(fd);
 		
-		seekTo(fd, 100, SEEK_SET);
+		seekTo(fd, 0, SEEK_SET);
 		
-		//printf("\n\n%d\n\n", readFromDevice(fd, buf, 100));
+		readFromDevice(fd, buf, 100);
 
 		char writting[]  = "ThisIsAi_test\t_This_should\n_be_in_there_this_should_also_probably_maybe_span_mulptiple_lines_definitely_now_becuasse_of_all_The_Extra_stuff";
 
@@ -235,7 +256,7 @@ main(argc, argv)
 		
 		
 		seekTo(fd, 7 * width, SEEK_SET);
-			
+
 		writeLineToDevice(fd, line1, sizeof(line1) - 1);
 		writeLineToDevice(fd, line2, sizeof(line2) - 1);
 			
