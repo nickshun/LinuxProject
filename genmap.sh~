@@ -2,12 +2,10 @@
 
 genmap(){
 
-local width height i j carac charArray randNum blanks half badRows
-declare -A map
+local width height i j carac charArray randNum blanks half
 
 let carac='0'
 let blanks=0
-let badRows=0
 
 if [ -z "$1" ] 
 then
@@ -28,36 +26,18 @@ let half=width/2
 		for((j=1; j<= height; j++))
 		do
 			#Get random num for ASCII
-			let randNum=$((RANDOM%90+32))
+			let randNum=$((RANDOM%2+32))
 			if [ $randNum -eq 32 ]
 			then
 				let "blanks++"
 			fi
 			if [ "$blanks" -gt "$half" ]
 			then
-				let "badRows++"
+				printf "STDERR too many blanks"
 			fi
 			carac=\\$(printf '%03o' $(($randNum)))
-		
-			if [ "$j" -eq "$width" ]
-			then
-				map[$i,$j]='\n'
-			else
-				map[$i,$j]=$carac
-			fi
+			printf "\e[$i;${j}f\e[1;34m${carac}\e[0m";
 		done
 	done
-if [ "$badRows" -gt "$half" ]
-then
-	echo "TOO MANY BLANKS IN THIS DOCUMENT"
-else
-	for((i=1; i<= width; i++))
-	do
-		for((j=1; j<= height; j++))
-		do
-			printf "${map[$i,$j]}"
-		done
-	done
-fi
 }
 genmap "$@"

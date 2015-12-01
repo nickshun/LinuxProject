@@ -45,73 +45,65 @@ void scan(int fid)
 	int linesOfText = 0;
 	int wordsNo = 0;
 	int length = 0;
-	int WIDTH = 5;
+	int WIDTH = 51;
 	int row = 0;
  
 	int sizeT = read(fid, fileBuf, sizeof(fileBuf));
 	int counter;	
-	int doneBool=0;
 	
 
 	while(sizeT !=0)
 	{
 		for (counter = 0; counter<sizeT;counter++)
 		{
-			if(doneBool==0)
+			/*if \n*/
+			if(fileBuf[counter] == '\n')
 			{
-				/*if \n*/
-				if(fileBuf[counter] == '\n')
-				{
-					linesOfText++;
-					wordsNo++;
+				linesOfText++;
+				wordsNo++;
 
-					if(length <= WIDTH)
+				if(length <= WIDTH)
+				{
+					while(length <= WIDTH)
 					{
-						while(length <= WIDTH)
-						{
-							printf("%c",' ');
-							length++;
-						}
+						printf("%c",' ');
+						length++;
 					}
 					length = 0;
 					printf("\n");
 				}
-				/*if " ", \n \r or \t*/
-				if ((fileBuf[counter]== '\r') || (fileBuf[counter]== '\t') || (fileBuf[counter]==' ') )
-				{
-					wordsNo++;
-				}
-				
+
+			}
+			/*if " ", \n \r or \t*/
+			if ((fileBuf[counter]== '\r') || (fileBuf[counter]== '\t') )
+			{
+				wordsNo++;
+			}
+			else
+			{
 				if (fileBuf[counter] != '\n')
 				{
 					length++;
-					/*printf("%i", length);*/
-					if (linesOfText<WIDTH)
+					if (linesOfText<=WIDTH)
 					{
 						if(length<=WIDTH)
 						{
 							printf("%c",fileBuf[counter]);
 						}
 					}
-					else
-					{
-						doneBool = 1;
-					}
-				}
-			}					
-			
+				}					
+			}	
 		}
 		sizeT = read(fid, fileBuf, sizeof(fileBuf));
 	}
+	/*end of file
+	printf("\nLines of text: ");
+	printf("%d", linesOfText);
+	printf("\n");
+	printf("Words: ");
+	printf("%d", wordsNo);
+	printf("\n");*/	
 	
-	if(linesOfText <= WIDTH)
-	{
-		while(linesOfText <= WIDTH)
-		{
-		      printf("%c",'\n');
-		      linesOfText++;
-		}
-	}
 }
 void usage(int argc, char ** argv)
 {

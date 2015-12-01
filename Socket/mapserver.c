@@ -19,13 +19,13 @@ int height = 50;
 int currentPos = 0;
 int currentRow = 0;
 
-void printMap(int fd);
+void getMap(int fd, int sockfd, int width, int height);
 int writeToDevice(int fd, char* str, int length);
 int readFromDevice(int fd, char* str, int length);
 int seekTo(int fd, int offset, int orig);
 int writeLineToDevice(int fd, char* str, int length);
 int getMapPos(int pos);
-
+int getData(char* input, int length, int *width, int *height);
 int main(int argc, char *argv[])
 {
 	int sockfd, newsockfd, portno;
@@ -34,16 +34,15 @@ int main(int argc, char *argv[])
 	struct sockaddr_in serv_addr, cli_addr;
      	int n;
 	char messageType;
-	int width, height, defaultDim;
-     	if (argc < 2) {
-		fprintf(stderr,"ERROR, no port provided\n");
-         	exit(1);
-     	}
+	int width = 0;
+	int height = 0;
+	int  defaultDim;
+     	
+	portno = defaultPort;
      	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-     	if (sockfd < 0) 
-        	error("ERROR opening socket");
+	if (sockfd < 0) 
+      		error("ERROR opening socket");
      	bzero((char *) &serv_addr, sizeof(serv_addr));
-     	portno = atoi(argv[1]);
      	serv_addr.sin_family = AF_INET;
      	serv_addr.sin_addr.s_addr = INADDR_ANY;
      	serv_addr.sin_port = htons(portno);
@@ -58,41 +57,21 @@ int main(int argc, char *argv[])
      	n = read(newsockfd,buffer,255);
      	if (n < 0) error("ERROR reading from socket");
      	printf("Here is the message: %s\n",buffer);
-	if(sizeof(buffer) == (sizeof(char)+sizeof(int)))
-	{
-		if(buffer[0] == 'M')
-			messageType = buffer[0];
-		if(buffer[1] == ' ')
-			width = buffer[2];
-	}
-	if(sizeof(buffer) == (sizeof(char)+(sizeof(int)*2)))
-	{
-		 if(buffer[0] == 'M')
-                        messageType = buffer[0];
-                if(buffer[1] == ' ')
-                        width = buffer[2];
-                if(buffer[3] == ' ')
-                        height = buffer[4];
-	}
-     	n = write(newsockfd,"I got your message",18);
 	
+	getData(buffer, sizeof(buffer) - 1, &width, &height);	
+
+	printf("width: %d height: %d\n", width, height);
 	int fd1 = open("/dev/asciimap", O_RDWR);
 	if (fd1 >= 0)
         {
-		printf("\n\nopened device\n\n");
-		printMap(fd1);
+		getMap(fd1, newsockfd, width, height);
+		close(fd1);
 	}
 	else
 	{
-		printf("\n\ndidnt open dvice %d\n\n", fd1);
+		printf("\n\ndidnt open device %d\n\n", fd1);
 	}
 	
-	
-	
-	
-	
-	
-     	if (n < 0) error("ERROR writing to socket");
      	close(newsockfd);
      	close(sockfd);
      	return 0; 
@@ -126,13 +105,13 @@ int seekTo(int fd, int offset, int orig)
         return currentPos;
 }
 
-void printMap(int fd)
+void getMap(int fd, int sockfd, int width, int height)
 {
         int mapSize = width * height;
-        char* map[mapSize];
+	char map[mapSize];
         int validChar;
         int lengthWritten = 0;
-        char* ch[1];
+        char ch[1];
         int i;
         int  n;
         char buf[1024];
@@ -145,7 +124,7 @@ void printMap(int fd)
         {
                 if (lengthWritten % width == 0)
                 {
-                        map[lengthWritten] = (char*)('\n');
+                        map[lengthWritten] = '\n';
                 }
                 else
                 {
@@ -153,7 +132,7 @@ void printMap(int fd)
 
                         if (validChar == 0)
                         {
-                                map[lengthWritten] = (char*)(' ');
+                                map[lengthWritten] = ' ';
                         }
                         else if (validChar > 0)
                         {
@@ -163,16 +142,9 @@ void printMap(int fd)
                 }
                 lengthWritten++;
         }
-
-        printf("\n");
-
-        for (i = 0; i < mapSize; i++)
-        {
-                printf("%c", map[i]);
-        }
-
-        printf("\n");
-
+	
+	n = write(sockfd,map,sizeof(map));
+        if (n < 0) error("ERROR writing to socket");
 }
 
 int writeToDevice(int fd, char* str, int length)
@@ -299,4 +271,55 @@ int readFromDevice(int fd, char* str, int length)
         }
 
         return bytes_read;
+}
+
+int getData(char* input, int length, int *width, int *height)
+{
+	int fp = fopen("logFile.txt", "a");
+	fprintf(fp, input);
+	fflush(fp);
+	fclose(fp);
+	
+	
+	int bytesRead = 0;
+	int num1 = -1;
+	int num2 = -1;
+	char* dataType;
+
+	char* type = strtok(input,"~");
+
+	if (type != NULL)
+	{
+		dataType = type;
+	}
+		
+	if (dataType[0] != 'M')
+                return 0;
+
+	type = strtok(NULL, "~");
+	
+	if (type != NULL)
+	{
+		num1 = atoi(type);
+	}
+
+	type = strtok(NULL, "~");
+
+        if (type != NULL)
+        {
+                num2 = atoi(type);
+        }
+		
+	if (num1 == 0)
+	{
+		*width = 50;
+		*height = 50;
+		return 1;
+	}
+	else
+	{
+		*width = num1;
+		*height = num2;
+		return 1;
+	}
 }
