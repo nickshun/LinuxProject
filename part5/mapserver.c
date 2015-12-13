@@ -60,7 +60,12 @@ int main(int argc, char *argv[])
      		
 
 		int length = readFromBuffer(newsockfd, buffer, sizeof(buffer) - 1);
-
+		
+		if (length > 0)
+		{
+			printf("got a message\n");
+		}
+		
 		if (length == sizeof(char) + sizeof(int) + sizeof(int))
 		{	
 			char* type = buffer;

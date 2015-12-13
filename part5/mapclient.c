@@ -34,31 +34,31 @@ int main(int argc, char *argv[])
         	error("ERROR connecting");
 	
 	char type = ' ';
-	width = 0; 
-	height = 0;
+        int w = 0;
+        int h = 0;
 
-	printf("Enter Type(M)");
-	type = getchar();
-	fflush(stdin);
-	printf("Enter width or 0 for basic map: ");
-	scanf("%d", &width);
-	fflush(stdin);
-	getchar();	
-	if (width != 0)
-	{
-		printf("Enter height: ");
-		scanf("%d", &height);
-		printf("%d", height);
-		fflush(stdin);
-		printf("here");
-		DimensionStruct message = {type, width, height};	
-		printf("here2");
-		n = write(sockfd, &message, sizeof(message));
-        	if (n < 0)
-                 	error("ERROR writing to socket");
+        printf("Enter Type(M)");
+        type = getchar();
 
-	}
-	
+        printf("Enter width or 0 for basic map: ");
+        scanf(" %d", &w);
+        getchar();
+        if (w != 0)
+        {
+                printf("Enter height: ");
+                scanf(" %d", &h);
+                width = w;
+                height = h;
+                DimensionStruct message = {type, width, height};
+                n = write(sockfd, &message, sizeof(message));
+
+                if (n < 0)
+                        error("ERROR writing to socket");
+
+        }
+
+
+
     	/*printf("Please enter the message Type: ");
     	bzero(buffer,256);
     	fgets(buffer,255,stdin);*/
@@ -69,11 +69,13 @@ int main(int argc, char *argv[])
         	 error("ERROR writing to socket");
 	*/
 	
-    	bzero(buffer,sizeof(buffer)+1);
-    	n = read(sockfd,buffer,sizeof(buffer));
+    	/*
+  	bzero(buffer,sizeof(buffer)+1);
+    	printf("waiting for server response\n");
+	n = read(sockfd,buffer,sizeof(buffer));
     	if (n < 0) 
         	 error("ERROR reading from socket");
-    	printf("%s\n",buffer);
+    	printf("%s\n",buffer);*/
     	close(sockfd);
     	return 0;
 }
