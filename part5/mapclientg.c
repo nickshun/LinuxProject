@@ -1,0 +1,234 @@
+#include "header.h"
+
+char* map;
+int mapSize;
+
+int main(int argc, char *argv[])
+{
+    	int sockfd, portno, n, width, height;
+    	struct sockaddr_in serv_addr;
+    	struct hostent *server;
+	mapSize = width * height;
+    	char buffer[50 * 50];
+    	
+	
+	if (argc < 2)
+	{
+		fprintf(stderr,"usage %s hostname\n", argv[0]);
+        	exit(0);
+	}
+	portno = defaultPort;
+	
+    	sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    	if (sockfd < 0) 
+        	error("ERROR opening socket");
+    	server = gethostbyname(argv[1]);
+    	if (server == NULL) {
+        	fprintf(stderr,"ERROR, no such host\n");
+        	exit(0);
+    	}
+    	bzero((char *) &serv_addr, sizeof(serv_addr));
+    	serv_addr.sin_family = AF_INET;
+    	bcopy((char *)server->h_addr, 
+        	 (char *)&serv_addr.sin_addr.s_addr,
+         	server->h_length);
+    	serv_addr.sin_port = htons(portno);
+    	if (connect(sockfd,(struct sockaddr *) &serv_addr,sizeof(serv_addr)) < 0) 
+        	error("ERROR connecting");
+	
+	char type = ' ';
+        int w = 0;
+        int h = 0;
+
+        printf("Enter Type(M)");
+        type = getchar();
+
+        printf("Enter width or 0 for basic map: ");
+        scanf(" %d", &w);
+        getchar();
+        if (w != 0)
+        {
+                printf("Enter height: ");
+                scanf(" %d", &h);
+                width = w;
+                height = h;
+                DimensionStruct message = {type, width, height};
+                n = write(sockfd, &message, sizeof(message));
+
+                if (n < 0)
+                        error("ERROR writing to socket");
+
+        }
+	
+    	/*
+    	printf("waiting for server response\n");
+	n = read(sockfd,buffer,sizeof(buffer));
+    	if (n < 0) 
+        	 error("ERROR reading from socket");
+	map = //getmap from buffer
+    	parseMap(map, mapSize, width, height);*/
+    	close(sockfd);
+    	return 0;
+}
+
+void parseMap(char* map, int mapSize, int width, int height)
+{
+        int currentIndex = 0;
+        int n;
+	int col;
+	int row;
+
+	char charArray[14] = {'J', 'B', 'G', 'K', 'E', 'L', 'A', 'M', 'E', 'N', 'M', 'S'};        
+
+        while (lengthWritten < mapSize)
+        {
+		col = currentIndex % width;
+		row = currentIndex / width;
+		
+		/*Check if character is an initial*/
+		bool isInitial = false;
+		for(i = 0; i<14; i++)
+		{
+			if(map[currentIndex] == charArray[i])
+			{
+				isInitial = true;
+				break;
+			}
+		}
+		if(isInitial)
+		{
+			/*FORK CHILD*/
+			forkChild(map[currentIndex], col, row);
+		}
+		else if (map[currentIndex] != '\n')
+		{				
+			map[currentIndex] = ' ';
+		}
+                currentIndex++;
+        }
+}
+void forkChild(char letter, int col, int row)
+{
+	/*set up for adjusting argv[0]*/
+	int argv0size = strlen(argv[0]);
+	/*strncpy(argv[0], "Parent thread name", argv0size);*/
+	int pid = fork();
+
+	if (pid == 0)
+	{
+		/*Concatenating strings?*/
+		char* teampid = "teampid ";
+		char space ' ';
+		char num1 = (col + '0');
+		char num2 = (row + '0');
+
+		char* nameString;
+
+		strcpy(nameString, teampid);
+		strcat(nameString, letter);
+		strcat(nameString, space);
+		strcat(nameString, num1);
+		strcat(nameString, space);
+		strcat(nameString, num2);
+
+		printf("forked successfully");
+		strncpy(argv[0], nameString, argv0size);
+		setUpSignal(pid, getppid(), 1);	
+	}
+	else if (pid > 0)
+	{
+		setUpSignal(pid, getppid(), 0);
+	}
+	else
+	{
+		fprintf(stderr, "Oops!\n");
+    		return -1;
+	}
+}
+void setUpSignal(pid_t pid, pid_t ppid, int isChild)
+{
+	void p_action(int), c_action(int);
+	static struct sigaction pact, cact;
+
+	/*set sgiusr1 action for parent */
+	pact.sa_handler = p_action;
+	sigaction(SIGUSR1, &pact, NULL);
+
+	cact.sa_handler = c_action;
+	sigaction(SIGUSR1, &cact, NULL);
+
+	/*fill in for now
+	bool isChild = false;*/
+	if(isChild == 0)
+	{
+		isParent = 1;
+	}
+	else
+	{
+		isParent = 0;
+	}
+	
+	if(isChild==1)
+	{
+		sleep(1);
+		kill(ppid, SIGUSR1);/*send message*/
+		pause();
+	}
+	if(isParent==1)
+	{
+		pause();/*wait for message*/
+		sleep(1);
+		kill(pid, SIGUSR1);
+	}
+}
+void p_action(int sig)
+{
+	printf("Parent caught signal %d\n", ++ntimes);
+}
+void c_action(int sig)
+{
+	printf("Child caught signal %d\n", ++ntimes);
+
+	sigset_t allSignals;
+	sigfillset(&allSignals);
+
+	/*Block other signals*/
+	sigprocmask(SIG_BLOCK,&allSignals, NULL);
+	/*Send new protocol message to the server {'K', initial, x, y}*/
+	/**/
+	/*Restore signals to normal*/
+	sigprocmask(SIG_UNBLOCK, &allSignals, NULL);
+	/*GET ARGV[0]=initial*/	
+	exit(argv[0]);
+}
+void printMap()
+{
+	/*new xterm window*/
+	pid_t pidMap[width][height];
+
+	int allEmpty = 1;
+
+	int k = 0;
+	
+	for (k = 0; k < mapSize; ++k)
+	{
+		printf('%c', map[k]);
+		if (map[k] != ' ')
+		{
+			allEmpty = 0;
+		}
+	}	
+	
+	if(allEmpty==1)
+	{
+		atExit();
+	{
+}
+
+void atExit()
+{
+	/*handler sends 2byte protocol message to server ("GO");
+	/*report errors*/
+	/*log*/
+	/*kill remaining processes*/
+}
